@@ -1,0 +1,13 @@
+{
+  "itemGroup.memc": "Example Mod Tab",
+  "block.memc.example_block": "Example Block",
+  "item.memc.example_item": "Example Item",
+
+  "memc.configuration.title": "ME-Mechanical Crafter Configs",
+  "memc.configuration.section.memc.common.toml": "ME-Mechanical Crafter Configs",
+  "memc.configuration.section.memc.common.toml.title": "ME-Mechanical Crafter Configs",
+  "memc.configuration.items": "Item List",
+  "memc.configuration.logDirtBlock": "Log Dirt Block",
+  "memc.configuration.magicNumberIntroduction": "Magic Number Text",
+  "memc.configuration.magicNumber": "Magic Number"
+}
