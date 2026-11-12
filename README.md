@@ -1,25 +1,69 @@
+# ME-Mechanical Crafter
 
-Installation information
-=======
+Minecraft 1.21.1 / NeoForge 模组，为 AE2 样板供应器提供 Create 动力合成器的位置化投料支持。
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+## 使用方式
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+1. 用扳手在同朝向动力合成器的接缝处右击，将需要填充的合成器组成共享输入组。另行调整合成箭头，使材料能按 Create 的规则汇合。接入动力。MEMC 投料完成后使用 Create 的允许空格启动流程，多余格子和配方内部空格不要求安装挡板；结构中的真实缺口也可以作为空格。
+2. 将 ME 样板供应器的工作面朝向共享输入组中的任意成员。适配器仅填充扳手连接的共享输入组，不向仅通过合成箭头关联的其他合成器投料。每次投料重新读取连接；断开后立即按新组处理。
+3. 手持空白样板，使用下列命令编码。产物及数量按 Create 实际配方查询，桶等容器余物也会计入输出。
+4. 将样板放入供应器。保持共享输入组及其合成箭头关联的整条合成链库存为空且空闲，合成时不要同时用其他装置向该组投料。组内成员必须能沿箭头汇入同一条有效合成链；MEMC 只向扳手组成员投料，启动前也会检查链上其他成员，防止意外消耗它们的材料。
+5. 将 Create 的成品和容器余物通过输出库存、传送带等回收到同一个 ME 网络。适配器负责投料；产物仍由 Create 合成和输出。
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+## JEI 联动：在 AE2 终端内编码
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+安装 JEI 后，可在原版 AE2 样板编码终端（`ae2:pattern_encoding_terminal`）中操作：
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+1. 打开样板编码终端，在 JEI 中查找 Create 的“机械合成”配方。
+2. 点击配方旁的“＋”。终端自动切换到加工样板模式，填入虚拟材料、产物和容器余物，不要求网络中已有材料。
+3. 放入空白样板，点击终端原来的编码按钮。得到带有配方宽高和空槽信息的 MEMC 加工样板，再放入样板供应器使用。
+
+支持超过 3×3 的配方（最多 81 格），以及 JEI 当前显示的标签材料候选。转移保留配方 ID，不会按相同产物任意选取另一配方；服务端验证每格材料并计算实际输出。
+
+转移后若手动改变材料、数量或输出，编码会提示从 JEI 重新转移。需要编码普通加工样板时，先点击终端清空按钮，再填入普通配方。终端仍使用 AE2 自带的加工槽位显示，并未新增独立的机械合成界面。JEI 为可选依赖，不安装时仍可使用下面的命令。
+
+## EMI 联动
+
+安装 EMI 后，同样可以在 AE2 样板编码终端中打开 Create 机械合成配方，点击 EMI 的填充按钮，再用终端原来的编码按钮生成 MEMC 样板。填充只设置虚拟配方，不要求真实材料，也不会直接生成物品。
+
+支持具有底层 Create 机械合成配方的 EMI 展示，包括通过 JEI 桥接到 EMI 的配方。使用底层配方 ID 和格子布局，避免桥接产生的显示 ID、空格省略或材料数量合并破坏布局。EMI 材料候选用于选择合法的标签材料；服务端仍逐格验证并计算产物。无底层机械合成配方的动态展示不会被当作可编码配方。
+
+AE2 自带的 EMI 通用处理器会让出机械合成配方，其余配方继续由 AE2 处理。JEI 和 EMI 都是可选依赖，可单独或同时安装；不过 Create 配方能否显示，仍取决于 EMI/相关配方展示兼容模组。
+
+## 编码命令
+
+- `/memc inspect`：检查视线所指合成器的 AE2 机器能力（逐面）、共享输入组尺寸、成员数、停转/忙碌/占用格及挡板数量。该命令不修改物品或连接，也不要求 OP 权限。
+
+- `/memc encode`：读取视线所指扳手共享输入组的当前材料和空格。建议停机后摆放材料并编码，然后清空材料并恢复动力。
+- `/memc id <物品ID>`：按产物查找唯一的机械合成配方，例如 `/memc id create:crushing_wheel`。标签材料默认选择第一个候选物品；需要指定材料时使用网格编码。
+- `/memc encode <物品ID>`：上一命令的别名。同物品有多个机械合成配方时不会任意选取，请改用网格编码。
+
+每次编码消耗一张空白样板，其余空白样板保留。样板会保存显式宽高，不通过输入数量猜测形状。小配方可在较大网格内自动寻找可用的矩形位置，保留配方空格和行跨度；已有挡板或结构缺口不会被用于需要放材料的格子。多余格子不需要安装挡板，也不会被填入额外材料。总格数足够仍需配方的宽、高和所需位置能实际放入，不会将有序配方压成任意形状。
+
+旧版生成的样板缺少宽高数据，必须重新编码。不要通过 AE2 的通用加工样板编辑界面改变这些样板的格子布局；这可能使其尺寸失效。当前仅接受本模组编码的物品加工样板，不接受流体输入或不保留位置的普通样板。网格包围矩形最多 81 格。
+
+## 开发与验证
+
+使用 Java 21 和 Gradle Wrapper：
+
+```powershell
+./gradlew.bat build
+./gradlew.bat test
+./gradlew.bat runClient
+```
+
+JUnit 测试位于 `src/test/java/`，覆盖空槽、小配方行跨度、不规则网格、尺寸拒绝及插入失败/异常回滚。
+
+完整环境就绪后，还需在游戏内验证：四种朝向、非对称及非方形配方、空槽挡板、忙碌/停机拒绝、连续订单、容器余物回收，以及保存退出后继续合成。开发依赖目前声明为 `compileOnly`，本地启动需要另外准备 AE2、Create 及它们的运行依赖。
+
+## 多人联机与版本核对
+
+客户端和服务端都需要安装同一份 MEMC JAR。JEI/EMI 是客户端可选组件；不安装它们也会注册 MEMC 的网络通道。
+
+如果出现 `memc:mechanical_recipe_transfer` 客户端缺少通道的提示，先退出客户端并停止服务器，将两端旧的 MEMC 包替换成同一份新包后重启。早期构建曾共用 `1.0.0` 版本号，同名文件未必内容一致；建议比较两端 JAR 的 SHA-256：
+
+```powershell
+Get-FileHash ./mods/memc-1.0.1.jar -Algorithm SHA256
+```
+
+两端启动日志均应出现 `MEMC 1.0.1 registered required payload memc:mechanical_recipe_transfer (protocol 1)`。如果其中一端没有此行，检查实际启动目录、模组列表及是否加载了旧文件。断连界面末尾的 NeoForge 版本提示不等于已经证明是加载器版本问题，应优先处理前面的具体通道错误。
