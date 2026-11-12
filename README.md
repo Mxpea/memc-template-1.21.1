@@ -1,5 +1,6 @@
 # ME-Mechanical Crafter
 
+**此项目使用了AI**
 Minecraft 1.21.1 / NeoForge 模组，为 AE2 样板供应器提供 Create 动力合成器的位置化投料支持。
 
 ## 使用方式
